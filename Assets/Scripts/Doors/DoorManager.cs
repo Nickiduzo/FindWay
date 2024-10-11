@@ -15,10 +15,13 @@ public class DoorManager : MonoBehaviour
         Door.OpenDoor += UnlockDoor;
     }
 
+    // use timer for hit
     private void Update()
     {
         HideHint();
     }
+    
+    // unlock door if player is nearly and play animation
     private void UnlockDoor(bool isLocked, string doorName)
     {
         if (isLocked && KeyUI.keysAmount > 0)
@@ -26,18 +29,21 @@ public class DoorManager : MonoBehaviour
             Animator anim = FindDoor(doorName);
             anim.SetBool("isOpenDoor", true);
         }
-        else
+        else if(isLocked)
         {
             timer = 5f;
             needKey.gameObject.SetActive(true);
         }
     }
 
+    // timer for hide hunt
     private void HideHint()
     {
         if(timer <= 0f) needKey.gameObject.SetActive(false);
         else timer -= Time.deltaTime;
     }
+
+    // find door with string name and return
     private Animator FindDoor(string name)
     {
         Animator animator = null;

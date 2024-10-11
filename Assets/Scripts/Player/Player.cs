@@ -4,7 +4,9 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public static event Action TakeKey;
+    
     public static event Action WinGame;
+    public static event Action GameOver;
 
     [SerializeField] private Transform cameraTransform;
 
@@ -29,7 +31,12 @@ public class Player : MonoBehaviour
     {
         MovePlayer();
         RotatePlayer();
+        MakeAudioStep();
+    }
 
+    // play audio step
+    private void MakeAudioStep()
+    {
         if (IsMoving() && timer <= 0)
         {
             AudioManager.instance.PlayStep();
@@ -71,6 +78,7 @@ public class Player : MonoBehaviour
         cameraTransform.localRotation = Quaternion.Euler(verticalLookRotation, 0f, 0f);
     }
 
+    // check on key, trap, end position
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Key"))
@@ -80,12 +88,12 @@ public class Player : MonoBehaviour
             Destroy(other.gameObject);
         }
 
-        if (other.gameObject.CompareTag("End"))
-        {
-            WinGame?.Invoke();
-        }
+        if (other.gameObject.CompareTag("End")) WinGame?.Invoke();
+
+        if(other.gameObject.CompareTag("Trap")) GameOver?.Invoke();
     }
 
+    // check on player is moving or not
     private bool IsMoving()
     {
         return Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0;

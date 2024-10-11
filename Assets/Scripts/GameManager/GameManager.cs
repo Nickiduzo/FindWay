@@ -1,5 +1,4 @@
 using TMPro;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,26 +15,40 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject pause;
 
     [SerializeField] private Timer timer;
+
+    // play default music and set cursor hide, subscribe on listeners
     private void Start()
     {
         AudioManager.instance.Play("Music");
 
         Cursor.lockState = CursorLockMode.Locked;
+    
         Player.WinGame += SwitchWin;
-    }
+        Player.GameOver += SwitchGameOver;
 
+        Enemy.KillPlayer += SwitchGameOver;
+    }
+    
+    // switch pause if player input 'esc' key and gamewin and gameover are unactive
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !gameWin.activeInHierarchy && !gameOver.activeInHierarchy)
+        {
             SwitchPause();
+        }
     }
     public void ContinueButton() => SwitchPause();
     
     public void ExitButton() => Application.Quit();
 
-    public void RestartGame() => SceneManager.LoadScene(0);
+    // reload game 
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(0);
+    }
  
-
+    // if pause is active deactivate pause or activate pause if it's not
     private void SwitchPause()
     {
         if(Time.timeScale == 1f)
@@ -55,23 +68,45 @@ public class GameManager : MonoBehaviour
             Cursor.visible = false;
         }
     }
-    private void SwtichGameOver()
-    {
-        gameOver.gameObject.SetActive(true);
 
-        float generalTime = timer.time;
-        int minutes = (int)generalTime / 60;
-        int seconds = (int)generalTime % 60;
-        gameOverTimer.text = "Time: " + string.Format("{0:00}:{1:00}", minutes, seconds);
+    // switch on game over ui element, unlock cursor and set time to 0
+    private void SwitchGameOver()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
+        Time.timeScale = 0f;
+
+        gameOver.gameObject.SetActive(true);
+        gameOverTimer.text = TakeFullTime();
     }
 
+    // switch on win ui element, unlock cursor and set time to 0
     private void SwitchWin()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
+        Time.timeScale = 0f;
+        
         gameWin.gameObject.SetActive(true);
+        gameWinTimer.text = TakeFullTime();
     }
 
+    // return full time that player spent in game
+    private string TakeFullTime()
+    {
+        float generalTime = timer.time;
+        
+        int minutes = (int)generalTime / 60;
+        
+        int seconds = (int)generalTime % 60;
+        
+        return "Time: " + string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
     private void OnDisable()
     {
         Player.WinGame -= SwitchWin;
+        Player.GameOver -= SwitchGameOver;
     }
 }

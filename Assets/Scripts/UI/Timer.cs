@@ -15,6 +15,7 @@ public class Timer : MonoBehaviour
         TimerUpdate();
     }
 
+    // timer that represent minutes and second spend in game
     private void TimerUpdate()
     {
         int minutes = (int)time / 60;
